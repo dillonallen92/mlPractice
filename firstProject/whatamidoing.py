@@ -11,6 +11,8 @@ Just trying to figure out what I am doing with this dataset
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import statsmodels.api as sm
+import random
 
 dataset_train = pd.read_csv("exoTrain.csv")
 
@@ -74,6 +76,120 @@ import graphviz
 with open("tree.dot") as f:
     dot_graph = f.read()
 graphviz.Source(dot_graph)
+
+##########################################################################################
+
+# Attempting to smooth the data from the first curve
+
+lowess = sm.nonparametric.lowess(flux_star_1, t, frac=0.1)
+lowess_2 = sm.nonparametric.lowess(flux_star_2, t, frac=0.1)
+
+# Without smoothing
+
+plt.subplot(2,2,1)
+plt.plot(t, flux_star_1, 'blue')
+plt.title("Unsmoothed light curve (Exo)")
+plt.xlabel("Time")
+plt.ylabel("Flux")
+
+# With Smoothing
+
+plt.subplot(2,2,2)
+plt.plot(lowess[:,0], lowess[:,1],'blue')
+plt.title("Smoothed Light Curve (Exo)")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+# Without smoothing for Star 40 (No Exoplanet)
+
+plt.subplot(2,2,3)
+plt.plot(t, flux_star_2, 'red')
+plt.title("Unsmoothed Light Curve (Non Exo)")
+plt.xlabel("Time")
+plt.ylabel("Flux")
+
+# With smoothing for Star 40
+
+plt.subplot(2,2,4)
+plt.plot(lowess_2[:,0], lowess_2[:,1], 'red')
+plt.title("Smoothed Light Curve (Non Exo)")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.tight_layout()
+plt.show()
+
+##########################################################################################
+
+# Plot 4 random exoplanet indices and 4 non-exoplanet indices
+
+randExo = []
+randNonExo = []
+for i in range(4):
+    randExo.append(random.randrange(1,36,1))
+    randNonExo.append(random.randrange(37,5087,1))
+
+smoothed_exos = [] # Initial run gave me randExo = [9,15,14,10]
+for val in randExo:
+    smoothed_exos.append(sm.nonparametric.lowess(dataset_train.iloc[val,1:].values,t,frac=0.1))
+
+smoothed_nonExos = [] # Initial run gave me randNonExo = [4975, 256, 2701, 4027]
+for val in randNonExo:
+    smoothed_nonExos.append(sm.nonparametric.lowess(dataset_train.iloc[val,1:].values, t, frac=0.1))
+
+# 4 Stars with exoplanets
+
+plt.subplot(2,4,1)
+plt.plot(smoothed_exos[0][:,0],smoothed_exos[0][:,1], 'blue')
+plt.title("Smoothed LC for Star 10")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,2)
+plt.plot(smoothed_exos[1][:,0],smoothed_exos[1][:,1], 'blue')
+plt.title("Smoothed LC for Star 16")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,3)
+plt.plot(smoothed_exos[2][:,0],smoothed_exos[2][:,1], 'blue')
+plt.title("Smoothed LC for Star 15")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,4)
+plt.plot(smoothed_exos[3][:,0],smoothed_exos[3][:,1], 'blue')
+plt.title("Smoothed LC for Star 11")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+# 4 stars without? Or unconfirmed...
+
+plt.subplot(2,4,5)
+plt.plot(smoothed_nonExos[0][:,0],smoothed_nonExos[0][:,1], 'blue')
+plt.title("Smoothed LC for Star 4976")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,6)
+plt.plot(smoothed_nonExos[1][:,0],smoothed_nonExos[1][:,1], 'blue')
+plt.title("Smoothed LC for Star 257")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,7)
+plt.plot(smoothed_nonExos[2][:,0],smoothed_nonExos[2][:,1], 'blue')
+plt.title("Smoothed LC for Star 2702")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.subplot(2,4,8)
+plt.plot(smoothed_nonExos[3][:,0],smoothed_nonExos[3][:,1], 'blue')
+plt.title("Smoothed LC for Star 4028")
+plt.xlabel("Time")
+plt.ylabel("Smoothed Flux")
+
+plt.show()
 
 ##########################################################################################
 
