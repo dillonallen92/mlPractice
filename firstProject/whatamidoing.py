@@ -72,7 +72,7 @@ from sklearn.tree import export_graphviz
 export_graphviz(tree, out_file="tree.dot",class_names=["exo", "non"], impurity= False, filled = True)
 
 import graphviz
-
+# look more into tree.dot
 with open("tree.dot") as f:
     dot_graph = f.read()
 graphviz.Source(dot_graph)
